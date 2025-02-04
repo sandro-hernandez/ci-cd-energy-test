@@ -1,0 +1,16 @@
+name: Simple Test Workflow
+
+on: [push]
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Print Hello World
+        run: echo "Hello, GitHub Actions!"
+
+      - name: Show System Info
+        run: uname -a && lscpu
