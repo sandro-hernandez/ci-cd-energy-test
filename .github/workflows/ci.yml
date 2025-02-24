@@ -1,0 +1,83 @@
+name: Complex CI Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  APP_ENV: "production"
+  SOME_OTHER_VARIABLE: "foo"
+
+jobs:
+  # 1) TEST JOB
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [14, 16, 18]  # Test across multiple Node versions
+    steps:
+      # Step 1: Check out the code from your repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the correct Node version (based on the matrix)
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Step 3: Cache dependencies (using npm as an example)
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Step 4: Install dependencies and build (if needed)
+      - name: Install dependencies
+        run: npm ci  # or 'npm install' if you don’t have a package-lock.json
+
+      - name: Build
+        run: npm run build --if-present
+
+      # Step 5: Run tests
+      - name: Run tests
+        run: npm test
+
+      # Step 6: Upload coverage artifacts, if generated
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-node-${{ matrix.node-version }}
+          path: coverage
+
+  # 2) BUILD JOB
+  build:
+    # This job depends on the 'test' job
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # (Optional) Example: Build and push a Docker image to GitHub Container Registry (GHCR)
+      - name: Build Docker image
+        run: docker build -t my-app .
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+            docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Tag Docker image
+        run: docker tag my-app ghcr.io/${{ github.repository }}/my-app:latest
+
+      - name: Push Docker image
+        run: docker push ghcr.io/${{ github.repository }}/my-app:latest
