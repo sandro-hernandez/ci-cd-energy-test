@@ -23,7 +23,7 @@ jobs:
 
       # 3) Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # 4) (Optional) Build or run your server
       # If you have a build script in package.json:
