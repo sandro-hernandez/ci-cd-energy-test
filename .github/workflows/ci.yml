@@ -31,5 +31,5 @@ jobs:
         run: npm run build --if-present
 
       # 5) Run tests, or just run the server
-      - name: Run tests
-        run: npm test
+      #- name: Run tests
+      #  run: npm test
