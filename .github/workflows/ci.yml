@@ -53,10 +53,11 @@ jobs:
       # Step 6: Upload coverage artifacts, if generated
       - name: Upload coverage artifacts
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
-          name: coverage-node-${{ matrix.node-version }}
+          name: coverage
           path: coverage
+
 
 
   # 2) BUILD JOB
