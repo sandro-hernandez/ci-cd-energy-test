@@ -1,3 +1,3 @@
 # ci-cd-energy-test
 
-# We are gonna make a simple workflow test
+# We are gonna perform a simple workflow test
